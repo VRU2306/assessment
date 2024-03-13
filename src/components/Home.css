@@ -43,8 +43,17 @@ justify-content: space-between;
     display: flex;
     
 }
+.upload-docs{
+margin-left: 19px;
+border: 1px dashed #67737A;
+box-sizing: border-box;
+border-radius: 8px;
+}
 .col-6{
     width: 50%;  
+}
+.h-50{
+    height: 70%;
 }
 .parent-width{
     display: flex;  

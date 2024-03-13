@@ -199,7 +199,10 @@ function Home() {
             case 2:
                 content = (
                     <Box className="row">
-                        <input type='file' accept='.pdf' multiple={true} onChange={handleFileChange} className='col-6' />
+                        <div className='col-6 h-50 upload-docs'>
+                        <label for="file">Upload Docs</label>
+                        <input type='file' accept='application/pdf' multiple={true} onChange={handleFileChange}  />
+                        </div>
                         <ul className='col-6'>
                             <li>
 <DoneIcon/> PDFs (not scanned copies) of company's operating bank current account(s) statements for the past 6 months.

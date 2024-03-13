@@ -30,25 +30,35 @@ const steps = [
 ];
 
 function Home() {
+  
     const [activeStep, setActiveStep] = useState(0);
     const [companyUen, setCompanyUen] = useState('');
     const [companyName, setCompanyName] = useState('');
     const [email, setEmail] = useState('');
     const [reEmail, setReemail] = useState('');
+    const [position, setPosition] = useState('');
     const [mobile, setMobile] = useState('');
     const [fullName, setFullName] = useState('');
     const [document, setDocument] = useState('');
     const [agree, setAgree] = useState(false);
     const [stepCompletion, setStepCompletion] = useState(steps.map(() => false));
 
+    const stepsForSecond=[companyName,companyUen]
+    const stepsForThird=[companyName,companyUen,email,mobile,fullName,reEmail,position]
+    const [isValidFirst,setIsValidFirst]=useState(false)
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
     };
 
 
-    const handleChange = (event) => {
-        const { id, value } = event.target;
-        console.log(id, value)
+    const handleChangeStep = (event) => {
+        console.log(isValidFirst,55)
+        if(event){
+            setActiveStep(1)
+        }
+        else{
+            setActiveStep(0)
+        }
     };
     const handleSubmit = () => {
         let data = {}
@@ -60,6 +70,7 @@ function Home() {
     }
     const companyNameChange = (event) => {
         setCompanyName(event.target.value)
+     
     }
     const RegisterMobile = (event) => {
         setMobile(event)
@@ -70,7 +81,17 @@ function Home() {
     const reEmailChange = (event) => {
         setReemail(event.target.value)
     }
+    const PositionChange=(event)=>{
+        setPosition(event.target.value)
+    }
 
+    const fullNameChange=(event)=>{
+        setFullName(event.target.value)
+    }
+
+    ValidatorForm.addValidationRule('isUENMatch', (value) => {
+        return /^[0-9]{8}[a-zA-Z]$/.test(value);
+    });
     ValidatorForm.addValidationRule('isEmailMatch', (value) => {
         if (value !== email) {
             return false;
@@ -86,6 +107,12 @@ function Home() {
         }
         return true;
     });
+    ValidatorForm.addValidationRule('isCompanyName', (value) => {
+        if (value?.trim() == '') {
+            return false;
+        }
+        return true;
+    });
 
     const handleFileChange = (event) => {
         const files = event.target.files;
@@ -96,7 +123,28 @@ function Home() {
         }
     };
 
+    const handleSecondStepChange = (step) => {
+        const areFieldsFilled = stepsForSecond.every(field => (field !== ''&& field !== ' '));
+        if(isValidFirst===true && areFieldsFilled ){
+            return false
+        }
+        return true;
+    };
+    
+    const handleFormValidation=()=>{
+        
+        const uenValid = /^[0-9]{8}[a-zA-Z]$/.test(companyUen);
+        const nameIsValid = companyName.trim()!='';
+        console.log(uenValid,nameIsValid,139)
+        setIsValidFirst(uenValid && nameIsValid);
 
+        if(uenValid && nameIsValid){
+            handleChangeStep(true)
+        }
+        else{
+            handleChangeStep(false)
+        }
+    }
 
     const renderStep = (step) => {
         let content = null;
@@ -112,10 +160,13 @@ function Home() {
                             name="companyUen"
                             className='text-width'
                             value={companyUen}
-                            validators={["required", "matchRegexp:^(?=.*[0-9])(?=.*[a-zA-Z])[0-9a-zA-Z]{8,}$"]}
+                            validators={["required", "isUENMatch"]}
                             onChange={companyUenChange}
                             errorMessages={["Company UEN is required", "Invalid Company UEN"]}
-
+                            onKeyUp={(e) => {
+                                console.log(e,167)
+                               handleChangeStep(companyName)
+                            }}
                         />
 
                         <TextValidator
@@ -126,8 +177,9 @@ function Home() {
                             placeholder='Enter your Company Name'
                             className='text-width'
                             onChange={companyNameChange}
-                            validators={["required"]}
-                            errorMessages={["Company Name is required"]}
+                            validators={["required","isCompanyName"]}
+                            onClick={companyNameChange}
+                            errorMessages={["Company Name is required","Company Name is required"]}
                         />
                     </Box>
 
@@ -143,23 +195,24 @@ function Home() {
                             value={fullName}
                             placeholder='Enter your Full Name'
                             className='text-width'
-                            onChange={companyNameChange}
+                            onChange={fullNameChange}
                             validators={["required"]}
                             errorMessages={["Company Name is required"]}
+                            disabled={handleSecondStepChange(step)}
                         />
                         <TextValidator
-                            id='companyName'
+                            id='fullName'
                             label="Position in Company"
                             name="fullName"
-                            value={fullName}
+                            value={position}
                             placeholder='Enter your Position in Company'
                             className='text-width'
-                            onChange={companyNameChange}
+                            onChange={PositionChange}
                             validators={["required"]}
                             errorMessages={["Company Name is required"]}
                         />
                         <TextValidator
-                            id='companyName'
+                            id='email'
                             label="Email"
                             name="fullName"
                             value={email}
@@ -167,6 +220,7 @@ function Home() {
                             className='text-width'
                             onChange={EmailChange}
                             validators={["required", 'isEmail']}
+                            helperText="The report will be delivered on this email address"
                             errorMessages={["Required", "Email is required"]}
                         />
                         <TextValidator
@@ -254,14 +308,14 @@ function Home() {
                     <Stepper activeStep={activeStep} orientation="vertical">
                         {steps.map((step, index) => (
                             <Step key={step.label} active={true}>
-                                <StepLabel >
+                                <StepLabel  >
                                     <div className='stepper-label'>
                                         {step.label}
                                     </div>
 
                                 </StepLabel>
                                 <StepContent>
-                                    <ValidatorForm onSubmit={handleSubmit} >
+                                    <ValidatorForm onSubmit={handleSubmit} instantValidate >
                                         {renderStep(index)}
                                     </ValidatorForm>
                                 </StepContent>
